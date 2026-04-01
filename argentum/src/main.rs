@@ -14,6 +14,75 @@ struct LinearImage {
     data: Vec<[f32; 3]>,
 }
 
+struct HDPoint {
+    exposure: f32,
+    density: f32,
+}
+
+struct HDCurve {
+    // List of control points that describe the hd curve per color channel
+    r: Vec<HDPoint>,
+    g: Vec<HDPoint>,
+    b: Vec<HDPoint>,
+}
+
+struct SpectralPoint {
+    wavelength: f32, // in nanometers
+    log_sensitivity: f32,
+}
+
+struct SpectralSensitivityCurve {
+    cyan: Vec<SpectralPoint>,
+    magenta: Vec<SpectralPoint>,
+    yellow: Vec<SpectralPoint>,
+}
+
+struct CrossSensitivityMatrix {
+    // derived from SpectralSensitivityCurve at load time
+    values: [[f32; 3]; 3],
+}
+
+fn integrate_color_channel(
+    spectral_points: &Vec<SpectralPoint>,
+    color_start: f32,
+    color_end: f32,
+) -> f32 {
+    let points: Vec<(f32, f32)> = spectral_points
+        .iter()
+        .filter(|p| p.wavelength >= color_start && p.wavelength <= color_end)
+        .map(|p| (p.wavelength, 10f32.powf(p.log_sensitivity)))
+        .collect();
+
+    points
+        .windows(2)
+        .map(|w| {
+            let (w1, l1) = w[0];
+            let (w2, l2) = w[1];
+            (w2 - w1) * (l1 + l2) / 2.0
+        })
+        .sum()
+}
+
+fn derive_cross_sensetivity_matrix(ssc: &SpectralSensitivityCurve) -> CrossSensitivityMatrix {
+    let colors = [(400.0, 500.0), (500.0, 600.0), (600.0, 700.0)]; //B, G, R
+    let mut matrix_values = [[0.0f32; 3]; 3];
+
+    for (layer_idx, layer) in [&ssc.yellow, &ssc.magenta, &ssc.cyan].iter().enumerate() {
+        let integrals: [f32; 3] = std::array::from_fn(|i| {
+            let (lower, upper) = colors[i];
+            integrate_color_channel(layer, lower, upper)
+        });
+        let sum: f32 = integrals.iter().sum();
+        for (i, &v) in integrals.iter().enumerate() {
+            matrix_values[layer_idx][i] = v / sum;
+        }
+    }
+
+    CrossSensitivityMatrix {
+        values: matrix_values,
+    }
+}
+
 fn is_raw(path: &std::path::Path) -> bool {
     match path
         .extension()
@@ -118,6 +187,6 @@ fn main() -> Result<()> {
         false => load_standard(&args.input),
     }?;
 
-    println!("Started with invalid path");
+    println!("Image with w {} and h {}", image.width, image.height);
     Ok(())
 }
