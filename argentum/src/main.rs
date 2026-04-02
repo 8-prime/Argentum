@@ -1,6 +1,7 @@
 use anyhow::{Result, anyhow};
 use clap::Parser;
 use rawler::imgop::develop::{Intermediate, ProcessingStep, RawDevelop};
+use serde::Deserialize;
 use std::path::Path;
 
 #[derive(Parser)]
@@ -14,11 +15,13 @@ struct LinearImage {
     data: Vec<[f32; 3]>,
 }
 
+#[derive(Deserialize)]
 struct HDPoint {
     exposure: f32,
     density: f32,
 }
 
+#[derive(Deserialize)]
 struct HDCurve {
     // List of control points that describe the hd curve per color channel
     r: Vec<HDPoint>,
@@ -26,11 +29,41 @@ struct HDCurve {
     b: Vec<HDPoint>,
 }
 
+impl HDCurve {
+    fn apply(&self, image: &LinearImage) -> LinearImage {
+        let data = image
+            .data
+            .iter()
+            .map(|&[r, g, b]| {
+                let to_log = |v: f32| {
+                    if v <= 0.0 {
+                        f32::NEG_INFINITY
+                    } else {
+                        v.log10()
+                    }
+                };
+                [
+                    interpolate_hd(&self.r, to_log(r)),
+                    interpolate_hd(&self.g, to_log(g)),
+                    interpolate_hd(&self.b, to_log(b)),
+                ]
+            })
+            .collect();
+        LinearImage {
+            width: image.width,
+            height: image.height,
+            data,
+        }
+    }
+}
+
+#[derive(Deserialize)]
 struct SpectralPoint {
     wavelength: f32, // in nanometers
     log_sensitivity: f32,
 }
 
+#[derive(Deserialize)]
 struct SpectralSensitivityCurve {
     cyan: Vec<SpectralPoint>,
     magenta: Vec<SpectralPoint>,
@@ -40,6 +73,49 @@ struct SpectralSensitivityCurve {
 struct CrossSensitivityMatrix {
     // derived from SpectralSensitivityCurve at load time
     values: [[f32; 3]; 3],
+}
+
+impl CrossSensitivityMatrix {
+    fn apply(&self, image: &LinearImage) -> LinearImage {
+        let data = image
+            .data
+            .iter()
+            .map(|&[r, g, b]| {
+                let v = &self.values;
+                [
+                    v[0][0] * b + v[0][1] * g + v[0][2] * r, // yellow layer
+                    v[1][0] * b + v[1][1] * g + v[1][2] * r, // magenta layer
+                    v[2][0] * b + v[2][1] * g + v[2][2] * r, // cyan layer
+                ]
+            })
+            .collect();
+        LinearImage {
+            width: image.width,
+            height: image.height,
+            data,
+        }
+    }
+}
+
+fn interpolate_hd(points: &[HDPoint], exposure: f32) -> f32 {
+    if exposure <= points[0].exposure {
+        return points[0].density;
+    }
+    let last = points.len() - 1;
+    if exposure >= points[last].exposure {
+        return points[last].density;
+    }
+    for i in 0..last {
+        if exposure <= points[i + 1].exposure {
+            let dx = points[i + 1].exposure - points[i].exposure;
+            if dx.abs() < f32::EPSILON {
+                return points[i].density;
+            }
+            let t = (exposure - points[i].exposure) / dx;
+            return points[i].density + t * (points[i + 1].density - points[i].density);
+        }
+    }
+    points[last].density
 }
 
 fn integrate_color_channel(
@@ -81,6 +157,18 @@ fn derive_cross_sensetivity_matrix(ssc: &SpectralSensitivityCurve) -> CrossSensi
     CrossSensitivityMatrix {
         values: matrix_values,
     }
+}
+
+fn load_hd_curve(path: &Path) -> Result<HDCurve> {
+    let file = std::fs::File::open(path)?;
+    let curve = serde_json::from_reader(std::io::BufReader::new(file))?;
+    Ok(curve)
+}
+
+fn load_ssc(path: &Path) -> Result<SpectralSensitivityCurve> {
+    let file = std::fs::File::open(path)?;
+    let ssc = serde_json::from_reader(std::io::BufReader::new(file))?;
+    Ok(ssc)
 }
 
 fn is_raw(path: &std::path::Path) -> bool {
@@ -182,11 +270,25 @@ fn load_standard(path: &Path) -> Result<LinearImage> {
 
 fn main() -> Result<()> {
     let args = Args::parse();
+
+    let hd_curve = load_hd_curve(Path::new("kodak_gold_200_hd.json"))?;
+    let ssc = load_ssc(Path::new("kodak_gold_200_ssc.json"))?;
+    let cross_sensitivity = derive_cross_sensetivity_matrix(&ssc);
+
     let image = match is_raw(&args.input) {
         true => load_raw(&args.input),
         false => load_standard(&args.input),
     }?;
 
-    println!("Image with w {} and h {}", image.width, image.height);
+    let image = cross_sensitivity.apply(&image);
+    let image = hd_curve.apply(&image);
+
+    let output_path = args.input.with_extension("tiff");
+    let flat: Vec<f32> = image.data.iter().flat_map(|&[r, g, b]| [r, g, b]).collect();
+    image::ImageBuffer::<image::Rgb<f32>, _>::from_raw(image.width, image.height, flat)
+        .ok_or_else(|| anyhow!("failed to construct output image buffer"))?
+        .save(&output_path)?;
+
+    println!("Saved to {}", output_path.display());
     Ok(())
 }

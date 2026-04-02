@@ -152,6 +152,8 @@ dependencies = [
  "clap",
  "image",
  "rawler",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
