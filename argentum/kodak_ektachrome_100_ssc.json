@@ -1,280 +1,280 @@
 {
   "yellow": [
     {
-      "wavelength": "394.83493077742276",
-      "log_sensitivity": "0.5141242937853105"
+      "wavelength": 394.83493077742276,
+      "log_sensitivity": 0.5141242937853105
     },
     {
-      "wavelength": "398.0298189563365",
-      "log_sensitivity": "0.6440677966101696"
+      "wavelength": 398.0298189563365,
+      "log_sensitivity": 0.6440677966101696
     },
     {
-      "wavelength": "400.69222577209797",
-      "log_sensitivity": "0.8135593220338984"
+      "wavelength": 400.69222577209797,
+      "log_sensitivity": 0.8135593220338984
     },
     {
-      "wavelength": "403.35463258785944",
-      "log_sensitivity": "1.0338983050847457"
+      "wavelength": 403.35463258785944,
+      "log_sensitivity": 1.0338983050847457
     },
     {
-      "wavelength": "408.14696485623006",
-      "log_sensitivity": "1.231638418079096"
+      "wavelength": 408.14696485623006,
+      "log_sensitivity": 1.231638418079096
     },
     {
-      "wavelength": "412.40681576144834",
-      "log_sensitivity": "1.327683615819209"
+      "wavelength": 412.40681576144834,
+      "log_sensitivity": 1.327683615819209
     },
     {
-      "wavelength": "420.3940362087327",
-      "log_sensitivity": "1.440677966101695"
+      "wavelength": 420.3940362087327,
+      "log_sensitivity": 1.440677966101695
     },
     {
-      "wavelength": "424.653887113951",
-      "log_sensitivity": "1.5084745762711864"
+      "wavelength": 424.653887113951,
+      "log_sensitivity": 1.5084745762711864
     },
     {
-      "wavelength": "428.91373801916933",
-      "log_sensitivity": "1.5310734463276834"
+      "wavelength": 428.91373801916933,
+      "log_sensitivity": 1.5310734463276834
     },
     {
-      "wavelength": "432.1086261980831",
-      "log_sensitivity": "1.4802259887005649"
+      "wavelength": 432.1086261980831,
+      "log_sensitivity": 1.4802259887005649
     },
     {
-      "wavelength": "434.2385516506922",
-      "log_sensitivity": "1.4124293785310735"
+      "wavelength": 434.2385516506922,
+      "log_sensitivity": 1.4124293785310735
     },
     {
-      "wavelength": "438.4984025559105",
-      "log_sensitivity": "1.3446327683615817"
+      "wavelength": 438.4984025559105,
+      "log_sensitivity": 1.3446327683615817
     },
     {
-      "wavelength": "447.55058572949946",
-      "log_sensitivity": "1.327683615819209"
+      "wavelength": 447.55058572949946,
+      "log_sensitivity": 1.327683615819209
     },
     {
-      "wavelength": "452.3429179978701",
-      "log_sensitivity": "1.3615819209039546"
+      "wavelength": 452.3429179978701,
+      "log_sensitivity": 1.3615819209039546
     },
     {
-      "wavelength": "458.2002129925453",
-      "log_sensitivity": "1.3954802259887007"
+      "wavelength": 458.2002129925453,
+      "log_sensitivity": 1.3954802259887007
     },
     {
-      "wavelength": "464.5899893503728",
-      "log_sensitivity": "1.3615819209039546"
+      "wavelength": 464.5899893503728,
+      "log_sensitivity": 1.3615819209039546
     },
     {
-      "wavelength": "468.84984025559106",
-      "log_sensitivity": "1.2429378531073447"
+      "wavelength": 468.84984025559106,
+      "log_sensitivity": 1.2429378531073447
     },
     {
-      "wavelength": "471.5122470713525",
-      "log_sensitivity": "1.0960451977401129"
+      "wavelength": 471.5122470713525,
+      "log_sensitivity": 1.0960451977401129
     },
     {
-      "wavelength": "474.17465388711395",
-      "log_sensitivity": "0.8983050847457625"
+      "wavelength": 474.17465388711395,
+      "log_sensitivity": 0.8983050847457625
     },
     {
-      "wavelength": "475.7720979765708",
-      "log_sensitivity": "0.7457627118644066"
+      "wavelength": 475.7720979765708,
+      "log_sensitivity": 0.7457627118644066
     },
     {
-      "wavelength": "480.03194888178916",
-      "log_sensitivity": "0.5254237288135593"
+      "wavelength": 480.03194888178916,
+      "log_sensitivity": 0.5254237288135593
     },
     {
-      "wavelength": "484.8242811501598",
-      "log_sensitivity": "0.2881355932203391"
+      "wavelength": 484.8242811501598,
+      "log_sensitivity": 0.2881355932203391
     },
     {
-      "wavelength": "491.7465388711395",
-      "log_sensitivity": "0.10734463276836159"
+      "wavelength": 491.7465388711395,
+      "log_sensitivity": 0.10734463276836159
     },
     {
-      "wavelength": "499.73375931842384",
-      "log_sensitivity": "-0.07909604519774005"
+      "wavelength": 499.73375931842384,
+      "log_sensitivity": -0.07909604519774005
     },
     {
-      "wavelength": "505.0585729499468",
-      "log_sensitivity": "-0.23163841807909602"
+      "wavelength": 505.0585729499468,
+      "log_sensitivity": -0.23163841807909602
     },
     {
-      "wavelength": "512.5133120340788",
-      "log_sensitivity": "-0.5084745762711864"
+      "wavelength": 512.5133120340788,
+      "log_sensitivity": -0.5084745762711864
     },
     {
-      "wavelength": "519.9680511182108",
-      "log_sensitivity": "-0.7740112994350283"
+      "wavelength": 519.9680511182108,
+      "log_sensitivity": -0.7740112994350283
     }
   ],
   "magenta": [
     {
-      "wavelength": "475.4762833768535",
-      "log_sensitivity": "-0.5769498903062944"
+      "wavelength": 475.4762833768535,
+      "log_sensitivity": -0.5769498903062944
     },
     {
-      "wavelength": "480.209400091004",
-      "log_sensitivity": "-0.40745765143530455"
+      "wavelength": 480.209400091004,
+      "log_sensitivity": -0.40745765143530455
     },
     {
-      "wavelength": "483.75931887681793",
-      "log_sensitivity": "-0.24424292205025022"
+      "wavelength": 483.75931887681793,
+      "log_sensitivity": -0.24424292205025022
     },
     {
-      "wavelength": "486.71754119822236",
-      "log_sensitivity": "-0.08730570215113143"
+      "wavelength": 486.71754119822236,
+      "log_sensitivity": -0.08730570215113143
     },
     {
-      "wavelength": "489.6757635196268",
-      "log_sensitivity": "0.08218670913628001"
+      "wavelength": 489.6757635196268,
+      "log_sensitivity": 0.08218670913628001
     },
     {
-      "wavelength": "493.81731376968946",
-      "log_sensitivity": "0.28934383250646034"
+      "wavelength": 493.81731376968946,
+      "log_sensitivity": 0.28934383250646034
     },
     {
-      "wavelength": "502.100349269654",
-      "log_sensitivity": "0.5090559748485113"
+      "wavelength": 502.100349269654,
+      "log_sensitivity": 0.5090559748485113
     },
     {
-      "wavelength": "508.60842537671147",
-      "log_sensitivity": "0.6471608387062453"
+      "wavelength": 508.60842537671147,
+      "log_sensitivity": 0.6471608387062453
     },
     {
-      "wavelength": "521.0330111267388",
-      "log_sensitivity": "0.7978205491194292"
+      "wavelength": 521.0330111267388,
+      "log_sensitivity": 0.7978205491194292
     },
     {
-      "wavelength": "528.132718698045",
-      "log_sensitivity": "0.9170928845193576"
+      "wavelength": 528.132718698045,
+      "log_sensitivity": 0.9170928845193576
     },
     {
-      "wavelength": "536.4158191981703",
-      "log_sensitivity": "1.055197748377092"
+      "wavelength": 536.4158191981703,
+      "log_sensitivity": 1.055197748377092
     },
     {
-      "wavelength": "542.3322638409791",
-      "log_sensitivity": "1.17446999756881"
+      "wavelength": 542.3322638409791,
+      "log_sensitivity": 1.17446999756881
     },
     {
-      "wavelength": "546.4737490908809",
-      "log_sensitivity": "1.2184123915539353"
+      "wavelength": 546.4737490908809,
+      "log_sensitivity": 1.2184123915539353
     },
     {
-      "wavelength": "552.9818901980993",
-      "log_sensitivity": "1.180747507054745"
+      "wavelength": 552.9818901980993,
+      "log_sensitivity": 1.180747507054745
     },
     {
-      "wavelength": "558.3067033766595",
-      "log_sensitivity": "1.1870250165406802"
+      "wavelength": 558.3067033766595,
+      "log_sensitivity": 1.1870250165406802
     },
     {
-      "wavelength": "564.814779483717",
-      "log_sensitivity": "1.205857458790276"
+      "wavelength": 564.814779483717,
+      "log_sensitivity": 1.205857458790276
     },
     {
-      "wavelength": "570.7312241265258",
-      "log_sensitivity": "1.19957994930434"
+      "wavelength": 570.7312241265258,
+      "log_sensitivity": 1.19957994930434
     },
     {
-      "wavelength": "573.689511448091",
-      "log_sensitivity": "1.243522429497677"
+      "wavelength": 573.689511448091,
+      "log_sensitivity": 1.243522429497677
     },
     {
-      "wavelength": "578.4226281622416",
-      "log_sensitivity": "1.1430825363473431"
+      "wavelength": 578.4226281622416,
+      "log_sensitivity": 1.1430825363473431
     },
     {
-      "wavelength": "582.5641784123043",
-      "log_sensitivity": "0.8668729810482962"
+      "wavelength": 582.5641784123043,
+      "log_sensitivity": 0.8668729810482962
     },
     {
-      "wavelength": "584.3391378052113",
-      "log_sensitivity": "0.5781084067773783"
+      "wavelength": 584.3391378052113,
+      "log_sensitivity": 0.5781084067773783
     },
     {
-      "wavelength": "590.25558244802",
-      "log_sensitivity": "0.1386841220932764"
+      "wavelength": 590.25558244802,
+      "log_sensitivity": 0.1386841220932764
     },
     {
-      "wavelength": "594.3970676979219",
-      "log_sensitivity": "-0.19402301857918913"
+      "wavelength": 594.3970676979219,
+      "log_sensitivity": -0.19402301857918913
     },
     {
-      "wavelength": "605.6383905194516",
-      "log_sensitivity": "-1.0226518568927525"
+      "wavelength": 605.6383905194516,
+      "log_sensitivity": -1.0226518568927525
     }
   ],
   "cyan": [
     {
-      "wavelength": "554.7567845908454",
-      "log_sensitivity": "-1.0414842129341375"
+      "wavelength": 554.7567845908454,
+      "log_sensitivity": -1.0414842129341375
     },
     {
-      "wavelength": "564.814779483717",
-      "log_sensitivity": "-0.9912641370466546"
+      "wavelength": 564.814779483717,
+      "log_sensitivity": -0.9912641370466546
     },
     {
-      "wavelength": "572.5061835194327",
-      "log_sensitivity": "-0.8217718981756654"
+      "wavelength": 572.5061835194327,
+      "log_sensitivity": -0.8217718981756654
     },
     {
-      "wavelength": "576.6477337694955",
-      "log_sensitivity": "-0.5078974583774272"
+      "wavelength": 576.6477337694955,
+      "log_sensitivity": -0.5078974583774272
     },
     {
-      "wavelength": "581.9725469480555",
-      "log_sensitivity": "-0.12497058665032168"
+      "wavelength": 581.9725469480555,
+      "log_sensitivity": -0.12497058665032168
     },
     {
-      "wavelength": "584.9307692694599",
-      "log_sensitivity": "0.14496145916279035"
+      "wavelength": 584.9307692694599,
+      "log_sensitivity": 0.14496145916279035
     },
     {
-      "wavelength": "592.0304768407661",
-      "log_sensitivity": "0.4462810524055789"
+      "wavelength": 592.0304768407661,
+      "log_sensitivity": 0.4462810524055789
     },
     {
-      "wavelength": "598.5386179479846",
-      "log_sensitivity": "0.6911032326913715"
+      "wavelength": 598.5386179479846,
+      "log_sensitivity": 0.6911032326913715
     },
     {
-      "wavelength": "606.2300219837003",
-      "log_sensitivity": "0.8103755680912998"
+      "wavelength": 606.2300219837003,
+      "log_sensitivity": 0.8103755680912998
     },
     {
-      "wavelength": "618.062911269318",
-      "log_sensitivity": "0.9861453164482246"
+      "wavelength": 618.062911269318,
+      "log_sensitivity": 0.9861453164482246
     },
     {
-      "wavelength": "634.0373508049983",
-      "log_sensitivity": "1.230967410525806"
+      "wavelength": 634.0373508049983,
+      "log_sensitivity": 1.230967410525806
     },
     {
-      "wavelength": "648.8285274121812",
-      "log_sensitivity": "1.4444021295901326"
+      "wavelength": 648.8285274121812,
+      "log_sensitivity": 1.4444021295901326
     },
     {
-      "wavelength": "654.7449720549901",
-      "log_sensitivity": "1.3816272071472002"
+      "wavelength": 654.7449720549901,
+      "log_sensitivity": 1.3816272071472002
     },
     {
-      "wavelength": "659.4781537693013",
-      "log_sensitivity": "1.0112551819755446"
+      "wavelength": 659.4781537693013,
+      "log_sensitivity": 1.0112551819755446
     },
     {
-      "wavelength": "664.8029669478615",
-      "log_sensitivity": "0.3207312075197155"
+      "wavelength": 664.8029669478615,
+      "log_sensitivity": 0.3207312075197155
     },
     {
-      "wavelength": "672.4943709835773",
-      "log_sensitivity": "-0.263075278091635"
+      "wavelength": 672.4943709835773,
+      "log_sensitivity": -0.263075278091635
     },
     {
-      "wavelength": "685.5105881978532",
-      "log_sensitivity": "-1.0100968379208823"
+      "wavelength": 685.5105881978532,
+      "log_sensitivity": -1.0100968379208823
     }
   ]
 }

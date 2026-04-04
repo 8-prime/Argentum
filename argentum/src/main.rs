@@ -428,27 +428,6 @@ fn load_standard(path: &Path) -> Result<LinearImage> {
     })
 }
 
-fn main() -> Result<()> {
-    let args = Args::parse();
-
-    let hd_curve = load_hd_curve(Path::new("kodak_gold_200_hd.json"))?;
-    let ssc = load_ssc(Path::new("kodak_gold_200_ssc.json"))?;
-    let cross_sensitivity = derive_cross_sensetivity_matrix(&ssc);
-
-    let image = match is_raw(&args.input) {
-        true => load_raw(&args.input),
-        false => load_standard(&args.input),
-    }?;
-
-    let image = cross_sensitivity.apply(&image);
-    // let image = hd_curve.apply(&image);
-
-    save_tiff(&image, &args.input)?;
-    save_jpeg(&image, &args.input)?;
-
-    Ok(())
-}
-
 fn save_tiff(image: &LinearImage, input: &std::path::Path) -> Result<()> {
     let output_path = input.with_extension("tiff");
     let flat: Vec<f32> = image
@@ -481,5 +460,26 @@ fn save_jpeg(image: &LinearImage, input: &std::path::Path) -> Result<()> {
         .ok_or_else(|| anyhow!("failed to construct output image buffer"))?
         .save(&output_path)?;
     println!("Saved to {}", output_path.display());
+    Ok(())
+}
+
+fn main() -> Result<()> {
+    let args = Args::parse();
+
+    // let hd_curve = load_hd_curve(Path::new("kodak_gold_200_hd.json"))?;
+    let ssc = load_ssc(Path::new("kodak_ektachrome_100_ssc.json"))?;
+    let cross_sensitivity = derive_cross_sensetivity_matrix(&ssc);
+
+    let image = match is_raw(&args.input) {
+        true => load_raw(&args.input),
+        false => load_standard(&args.input),
+    }?;
+
+    let image = cross_sensitivity.apply(&image);
+    // let image = hd_curve.apply(&image);
+
+    save_tiff(&image, &args.input)?;
+    save_jpeg(&image, &args.input)?;
+
     Ok(())
 }
