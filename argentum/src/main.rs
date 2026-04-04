@@ -1,18 +1,87 @@
 use anyhow::{Result, anyhow};
 use clap::Parser;
-use rawler::imgop::develop::{Intermediate, ProcessingStep, RawDevelop};
+use rawler::{
+    formats::bmff::vmhd::RgbColor,
+    imgop::develop::{Intermediate, ProcessingStep, RawDevelop},
+};
 use serde::Deserialize;
-use std::path::Path;
+use std::{
+    ops::{Index, IndexMut},
+    path::Path,
+};
+use strum::IntoEnumIterator; // 0.17.1
+use strum_macros::EnumIter; // 0.17.1
 
 #[derive(Parser)]
 struct Args {
     input: std::path::PathBuf,
 }
 
+struct PixelData {
+    red: f32,
+    green: f32,
+    blue: f32,
+}
+
+impl PixelData {
+    fn sum(&self) -> f32 {
+        self.red + self.green + self.blue
+    }
+
+    fn normalize(&mut self) {
+        let sum = &self.sum();
+        self.red = self.red / sum;
+        self.green = self.green / sum;
+        self.blue = self.blue / sum;
+    }
+
+    fn linearize(&self) -> PixelData {
+        PixelData {
+            red: srgb_to_linear(self.red),
+            green: srgb_to_linear(self.green),
+            blue: srgb_to_linear(self.blue),
+        }
+    }
+
+    fn gamma(&self) -> PixelData {
+        PixelData {
+            red: linear_to_srgb(self.red),
+            green: linear_to_srgb(self.green),
+            blue: linear_to_srgb(self.blue),
+        }
+    }
+
+    fn as_slice(&self) -> [f32; 3] {
+        [self.red, self.green, self.blue]
+    }
+}
+
+impl IndexMut<RgbColorType> for PixelData {
+    fn index_mut(&mut self, index: RgbColorType) -> &mut Self::Output {
+        match index {
+            RgbColorType::Red => &mut self.red,
+            RgbColorType::Green => &mut self.green,
+            RgbColorType::Blue => &mut self.blue,
+        }
+    }
+}
+
+impl Index<RgbColorType> for PixelData {
+    type Output = f32;
+
+    fn index(&self, index: RgbColorType) -> &Self::Output {
+        match index {
+            RgbColorType::Red => &self.red,
+            RgbColorType::Green => &self.green,
+            RgbColorType::Blue => &self.blue,
+        }
+    }
+}
+
 struct LinearImage {
     width: u32,
     height: u32,
-    data: Vec<[f32; 3]>,
+    data: Vec<PixelData>,
 }
 
 #[derive(Deserialize)]
@@ -34,7 +103,7 @@ impl HDCurve {
         let data = image
             .data
             .iter()
-            .map(|&[r, g, b]| {
+            .map(|p| {
                 let to_log = |v: f32| {
                     if v <= 0.0 {
                         f32::NEG_INFINITY
@@ -42,11 +111,11 @@ impl HDCurve {
                         v.log10()
                     }
                 };
-                [
-                    interpolate_hd(&self.r, to_log(r)),
-                    interpolate_hd(&self.g, to_log(g)),
-                    interpolate_hd(&self.b, to_log(b)),
-                ]
+                PixelData {
+                    red: interpolate_hd(&self.r, to_log(p.red)),
+                    green: interpolate_hd(&self.g, to_log(p.green)),
+                    blue: interpolate_hd(&self.b, to_log(p.blue)),
+                }
             })
             .collect();
         LinearImage {
@@ -70,9 +139,34 @@ struct SpectralSensitivityCurve {
     yellow: Vec<SpectralPoint>,
 }
 
+impl Index<CmyColorType> for SpectralSensitivityCurve {
+    type Output = Vec<SpectralPoint>;
+    fn index(&self, color: CmyColorType) -> &Self::Output {
+        match color {
+            CmyColorType::Cyan => &self.cyan,
+            CmyColorType::Magenta => &self.magenta,
+            CmyColorType::Yellow => &self.yellow,
+        }
+    }
+}
+
 struct CrossSensitivityMatrix {
-    // derived from SpectralSensitivityCurve at load time
-    values: [[f32; 3]; 3],
+    //use pixel data to allow for accessing the different matrix values by their color represenattion.
+    // TODO: theoretically this should be its own struct.
+    red: PixelData,
+    green: PixelData,
+    blue: PixelData,
+}
+
+impl Index<RgbColorType> for CrossSensitivityMatrix {
+    type Output = PixelData;
+    fn index(&self, color: RgbColorType) -> &Self::Output {
+        match color {
+            RgbColorType::Red => &self.red,
+            RgbColorType::Green => &self.green,
+            RgbColorType::Blue => &self.blue,
+        }
+    }
 }
 
 impl CrossSensitivityMatrix {
@@ -80,19 +174,64 @@ impl CrossSensitivityMatrix {
         let data = image
             .data
             .iter()
-            .map(|&[r, g, b]| {
-                let v = &self.values;
-                [
-                    v[0][0] * b + v[0][1] * g + v[0][2] * r, // yellow layer
-                    v[1][0] * b + v[1][1] * g + v[1][2] * r, // magenta layer
-                    v[2][0] * b + v[2][1] * g + v[2][2] * r, // cyan layer
-                ]
+            .map(|p| PixelData {
+                red: &self[RgbColorType::Red].red * p.red
+                    + &self[RgbColorType::Red].green * p.green
+                    + &self[RgbColorType::Red].blue * p.blue,
+                green: &self[RgbColorType::Green].red * p.red
+                    + &self[RgbColorType::Green].green * p.green
+                    + &self[RgbColorType::Green].blue * p.blue,
+                blue: &self[RgbColorType::Blue].red * p.red
+                    + &self[RgbColorType::Blue].green * p.green
+                    + &self[RgbColorType::Blue].blue * p.blue,
             })
             .collect();
         LinearImage {
             width: image.width,
             height: image.height,
             data,
+        }
+    }
+}
+
+#[derive(Debug, EnumIter)]
+enum RgbColorType {
+    Red,
+    Green,
+    Blue,
+}
+
+impl RgbColorType {
+    pub const fn range(&self) -> (f32, f32) {
+        match self {
+            RgbColorType::Red => (400.0, 500.0),
+            RgbColorType::Green => (500.0, 600.0),
+            RgbColorType::Blue => (600.0, 700.0),
+        }
+    }
+
+    pub const fn to_cmy(&self) -> CmyColorType {
+        match self {
+            RgbColorType::Red => CmyColorType::Cyan,
+            RgbColorType::Green => CmyColorType::Magenta,
+            RgbColorType::Blue => CmyColorType::Yellow,
+        }
+    }
+}
+
+#[derive(Debug, EnumIter)]
+enum CmyColorType {
+    Cyan,
+    Magenta,
+    Yellow,
+}
+
+impl CmyColorType {
+    pub const fn to_rgb(&self) -> RgbColorType {
+        match self {
+            CmyColorType::Cyan => RgbColorType::Red,
+            CmyColorType::Magenta => RgbColorType::Green,
+            CmyColorType::Yellow => RgbColorType::Blue,
         }
     }
 }
@@ -139,23 +278,31 @@ fn integrate_color_channel(
         .sum()
 }
 
-fn derive_cross_sensetivity_matrix(ssc: &SpectralSensitivityCurve) -> CrossSensitivityMatrix {
-    let colors = [(400.0, 500.0), (500.0, 600.0), (600.0, 700.0)]; //B, G, R
-    let mut matrix_values = [[0.0f32; 3]; 3];
+fn derive_cross_sensetivity_matrix_for_color(
+    ssc: &SpectralSensitivityCurve,
+    color: RgbColorType,
+) -> PixelData {
+    let layer = &ssc[RgbColorType::to_cmy(&color)];
 
-    for (layer_idx, layer) in [&ssc.yellow, &ssc.magenta, &ssc.cyan].iter().enumerate() {
-        let integrals: [f32; 3] = std::array::from_fn(|i| {
-            let (lower, upper) = colors[i];
-            integrate_color_channel(layer, lower, upper)
-        });
-        let sum: f32 = integrals.iter().sum();
-        for (i, &v) in integrals.iter().enumerate() {
-            matrix_values[layer_idx][i] = v / sum;
-        }
+    let mut pixelData = PixelData {
+        blue: 0.0,
+        green: 0.0,
+        red: 0.0,
+    };
+
+    for matrix_color in RgbColorType::iter() {
+        let (lower, upper) = matrix_color.range();
+        pixelData[matrix_color] = integrate_color_channel(&layer, lower, upper)
     }
+    pixelData.normalize();
+    pixelData
+}
 
+fn derive_cross_sensetivity_matrix(ssc: &SpectralSensitivityCurve) -> CrossSensitivityMatrix {
     CrossSensitivityMatrix {
-        values: matrix_values,
+        red: derive_cross_sensetivity_matrix_for_color(ssc, RgbColorType::Red),
+        green: derive_cross_sensetivity_matrix_for_color(ssc, RgbColorType::Green),
+        blue: derive_cross_sensetivity_matrix_for_color(ssc, RgbColorType::Blue),
     }
 }
 
@@ -215,12 +362,10 @@ fn load_raw(path: &Path) -> Result<LinearImage> {
         Intermediate::ThreeColor(pixels) => pixels
             .data
             .iter()
-            .map(|p| {
-                [
-                    (p[0] * rescale_factor).max(0.0),
-                    (p[1] * rescale_factor).max(0.0),
-                    (p[2] * rescale_factor).max(0.0),
-                ]
+            .map(|p| PixelData {
+                red: (p[0] * rescale_factor).max(0.0),
+                green: (p[1] * rescale_factor).max(0.0),
+                blue: (p[2] * rescale_factor).max(0.0),
             })
             .collect(),
         Intermediate::Monochrome(pixels) => pixels
@@ -228,7 +373,11 @@ fn load_raw(path: &Path) -> Result<LinearImage> {
             .iter()
             .map(|p| {
                 let v = (p * rescale_factor).max(0.0);
-                [v, v, v]
+                PixelData {
+                    red: v,
+                    green: v,
+                    blue: v,
+                }
             })
             .collect(),
         _ => return Err(anyhow!("unsupported intermediate foramt")),
@@ -251,6 +400,13 @@ fn srgb_to_linear(v: f32) -> f32 {
     }
 }
 
+fn linear_to_srgb(v: f32) -> f32 {
+    if (v <= 0.0031308) {
+        return 12.92 * v;
+    }
+    1.055 * v.powf(1.0 / 2.4) - 0.055
+}
+
 fn load_standard(path: &Path) -> Result<LinearImage> {
     let img = image::open(path)?.into_rgb32f();
     let (width, height) = img.dimensions();
@@ -258,7 +414,11 @@ fn load_standard(path: &Path) -> Result<LinearImage> {
         .pixels()
         .map(|p| {
             let [r, g, b] = p.0;
-            [srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b)]
+            PixelData {
+                red: srgb_to_linear(r),
+                green: srgb_to_linear(g),
+                blue: srgb_to_linear(b),
+            }
         })
         .collect();
     Ok(LinearImage {
@@ -281,10 +441,14 @@ fn main() -> Result<()> {
     }?;
 
     let image = cross_sensitivity.apply(&image);
-    let image = hd_curve.apply(&image);
+    // let image = hd_curve.apply(&image);
 
     let output_path = args.input.with_extension("tiff");
-    let flat: Vec<f32> = image.data.iter().flat_map(|&[r, g, b]| [r, g, b]).collect();
+    let flat: Vec<f32> = image
+        .data
+        .iter()
+        .flat_map(|p| p.gamma().as_slice())
+        .collect();
     image::ImageBuffer::<image::Rgb<f32>, _>::from_raw(image.width, image.height, flat)
         .ok_or_else(|| anyhow!("failed to construct output image buffer"))?
         .save(&output_path)?;
