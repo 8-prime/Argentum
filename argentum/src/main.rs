@@ -204,9 +204,9 @@ enum RgbColorType {
 impl RgbColorType {
     pub const fn range(&self) -> (f32, f32) {
         match self {
-            RgbColorType::Red => (400.0, 500.0),
+            RgbColorType::Red => (600.0, 700.0),
             RgbColorType::Green => (500.0, 600.0),
-            RgbColorType::Blue => (600.0, 700.0),
+            RgbColorType::Blue => (400.0, 500.0),
         }
     }
 
