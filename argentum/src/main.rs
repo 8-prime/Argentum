@@ -7,7 +7,7 @@ use rawler::{
 use serde::Deserialize;
 use std::{
     ops::{Index, IndexMut},
-    path::Path,
+    path::{Path, PathBuf},
 };
 use strum::IntoEnumIterator; // 0.17.1
 use strum_macros::EnumIter; // 0.17.1
@@ -15,6 +15,7 @@ use strum_macros::EnumIter; // 0.17.1
 #[derive(Parser)]
 struct Args {
     input: std::path::PathBuf,
+    output: Option<std::path::PathBuf>,
 }
 
 struct PixelData {
@@ -463,6 +464,13 @@ fn save_jpeg(image: &LinearImage, input: &std::path::Path) -> Result<()> {
     Ok(())
 }
 
+fn determine_output(args: &Args) -> PathBuf {
+    if let Some(out) = &args.output {
+        return out.clone();
+    }
+    return args.input.with_extension("jpg");
+}
+
 fn main() -> Result<()> {
     let args = Args::parse();
 
@@ -475,11 +483,13 @@ fn main() -> Result<()> {
         false => load_standard(&args.input),
     }?;
 
+    println!("Loaded image with w {} and h {}", image.width, image.height);
+
     let image = cross_sensitivity.apply(&image);
     // let image = hd_curve.apply(&image);
 
-    save_tiff(&image, &args.input)?;
-    save_jpeg(&image, &args.input)?;
+    // save_tiff(&image, &args.input)?;
+    save_jpeg(&image, &determine_output(&args))?;
 
     Ok(())
 }
